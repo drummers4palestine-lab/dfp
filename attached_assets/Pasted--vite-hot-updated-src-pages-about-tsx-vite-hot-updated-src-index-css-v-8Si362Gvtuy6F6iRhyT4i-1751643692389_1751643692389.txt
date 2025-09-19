@@ -1,0 +1,28 @@
+
+[vite] hot updated: /src/pages/about.tsx
+[vite] hot updated: /src/index.css?v=8Si362Gvtuy6F6iRhyT4i
+Error generating audio: 
+ReferenceError {}
+
+Error generating audio: 
+ReferenceError {}
+message: "MPEGMode is not defined"
+stack: "ReferenceError: MPEGMode is not defined↵ at lame_init_old (https://dab701ec-f287-449e-a14f-00fcc30c1a34-00-1h640yfym18nu.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/lamejs.js?v=ebcdf6d6:11776:20)↵ at Lame2.lame_init (https://dab701ec-f287-449e-a14f-00fcc30c1a34-00-1h640yfym18nu.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/lamejs.js?v=ebcdf6d6:11834:19)↵ at new Mp3Encoder (https://dab701ec-f287-449e-a14f-00fcc30c1a34-00-1h640yfym18nu.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/lamejs.js?v=ebcdf6d6:15408:22)↵ at https://dab701ec-f287-449e-a14f-00fcc30c1a34-00-1h640yfym18nu.picard.replit.dev/src/pages/experiment.tsx:168:26"
+get stack: ƒ ()
+set stack: ƒ ()
+[[Prototype]]: Object
+
+Error generating audio: 
+ReferenceError {}
+
+at t.value (https://dab701ec-f287-449e-a14f-00fcc30c1a34-00-1h640yfym18nu.picard.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://dab701ec-f287-449e-a14f-00fcc30c1a34-00-1h640yfym18nu.picard.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://dab701ec-f287-449e-a14f-00fcc30c1a34-00-1h640yfym18nu.picard.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://dab701ec-f287-449e-a14f-00fcc30c1a34-00-1h640yfym18nu.picard.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+Error generating audio: 
+ReferenceError {}
+
+at t.value (https://dab701ec-f287-449e-a14f-00fcc30c1a34-00-1h640yfym18nu.picard.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://dab701ec-f287-449e-a14f-00fcc30c1a34-00-1h640yfym18nu.picard.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://dab701ec-f287-449e-a14f-00fcc30c1a34-00-1h640yfym18nu.picard.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://dab701ec-f287-449e-a

@@ -1,0 +1,122 @@
+# Complete Stroke to Audio File Mapping
+
+## ASCII to Hex Conversion Reference
+- `'X'` → ASCII 88 → Hex: `58`
+- `'0'` → ASCII 48 → Hex: `30`
+- `'s'` → ASCII 115 → Hex: `73`
+- `'r'` → ASCII 114 → Hex: `72`
+- `'f'` → ASCII 102 → Hex: `66`
+- `'h'` → ASCII 104 → Hex: `68`
+- `'.'` → ASCII 46 → Hex: `2e`
+- `'a'` → ASCII 97 → Hex: `61`
+- `'o'` → ASCII 111 → Hex: `6f`
+- `'w'` → ASCII 119 → Hex: `77`
+
+---
+
+## Complete Stroke to Audio File Mappings
+
+### Low Surdo (`ls`)
+- `'X'` → `ls_58.mp3` (Hit)
+- `'0'` → `ls_30.mp3` (Damp with hand/beater)
+- `'s'` → `ls_73.mp3` (Slap)
+- `'r'` → `ls_72.mp3` (Rim shot)
+
+### Mid Surdo (`ms`)
+- `'X'` → `ms_58.mp3` (Hit)
+- `'0'` → `ms_30.mp3` (Damp with hand/beater)
+- `'s'` → `ms_73.mp3` (Slap)
+- `'r'` → `ms_72.mp3` (Rim shot)
+
+### High Surdo (`hs`)
+- `'X'` → `hs_58.mp3` (Hit)
+- `'0'` → `hs_30.mp3` (Damp with hand/beater)
+- `'s'` → `hs_73.mp3` (Slap)
+- `'r'` → `hs_72.mp3` (Rim shot)
+
+### Repi (`re`)
+- `'X'` → `re_58.mp3` (Hit)
+- `'f'` → `re_66.mp3` (Flam)
+- `'h'` → `re_68.mp3` (Hand)
+- `'s'` → `re_73.mp3` (Slap)
+- `'r'` → `re_72.mp3` (Rim)
+
+### Snare (`sn`)
+- `'X'` → `sn_58.mp3` (Hit)
+- `'.'` → `sn_2e.mp3` (Ghost note)
+- `'r'` → `sn_72.mp3` (Rim shot)
+
+### Tamborim (`ta`)
+- `'X'` → `ta_58.mp3` (Hit)
+- `'r'` → `ta_72.mp3` (Rim)
+
+### Agogo (`ag`)
+- `'a'` → `ag_61.mp3` (Low bell)
+- `'o'` → `ag_6f.mp3` (High bell)
+
+### Shaker (`sh`)
+- `'X'` → `sh_58.mp3` (Shake)
+- `'.'` → `sh_2e.mp3` (Soft shake)
+
+### Other/Whistle (`ot`)
+- `'w'` → `ot_77.mp3` (Whistle)
+
+---
+
+## All Audio Files by Instrument
+
+### Low Surdo Files:
+- `ls_30.mp3` ← `'0'` (Damp)
+- `ls_58.mp3` ← `'X'` (Hit)
+- `ls_72.mp3` ← `'r'` (Rim shot)
+- `ls_73.mp3` ← `'s'` (Slap)
+
+### Mid Surdo Files:
+- `ms_30.mp3` ← `'0'` (Damp)
+- `ms_58.mp3` ← `'X'` (Hit)
+- `ms_72.mp3` ← `'r'` (Rim shot)
+- `ms_73.mp3` ← `'s'` (Slap)
+
+### High Surdo Files:
+- `hs_30.mp3` ← `'0'` (Damp)
+- `hs_58.mp3` ← `'X'` (Hit)
+- `hs_72.mp3` ← `'r'` (Rim shot)
+- `hs_73.mp3` ← `'s'` (Slap)
+
+### Repi Files:
+- `re_58.mp3` ← `'X'` (Hit)
+- `re_66.mp3` ← `'f'` (Flam)
+- `re_68.mp3` ← `'h'` (Hand)
+- `re_72.mp3` ← `'r'` (Rim)
+- `re_73.mp3` ← `'s'` (Slap)
+
+### Snare Files:
+- `sn_2e.mp3` ← `'.'` (Ghost note)
+- `sn_58.mp3` ← `'X'` (Hit)
+- `sn_72.mp3` ← `'r'` (Rim shot)
+
+### Tamborim Files:
+- `ta_58.mp3` ← `'X'` (Hit)
+- `ta_72.mp3` ← `'r'` (Rim)
+
+### Agogo Files:
+- `ag_61.mp3` ← `'a'` (Low bell)
+- `ag_6f.mp3` ← `'o'` (High bell)
+
+### Shaker Files:
+- `sh_2e.mp3` ← `'.'` (Soft shake)
+- `sh_58.mp3` ← `'X'` (Shake)
+
+### Other/Whistle Files:
+- `ot_77.mp3` ← `'w'` (Whistle)
+
+---
+
+## Total Audio Files Required: 28 files
+
+**Formula:** `{instrument}_{hex_ascii_code}.mp3`
+
+**Example:** Stroke `'s'` on Low Surdo → `ls_73.mp3`
+- `'s'` = ASCII 115 = Hex 73
+- Low Surdo = `ls`
+- Result: `ls_73.mp3`
