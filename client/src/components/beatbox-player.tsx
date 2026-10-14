@@ -97,7 +97,7 @@ export default function BeatboxPlayer({ tune, showDrummerPov = false }: BeatboxP
   if (!pattern) return null;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8 min-w-0 max-w-full">
       <AudioContextWarning />
 
       {showDrummerPov && (
@@ -117,11 +117,11 @@ export default function BeatboxPlayer({ tune, showDrummerPov = false }: BeatboxP
         />
       )}
 
-      <Card className="bg-gray-800 border-gray-700">
-        <CardHeader>
-          <CardTitle className="street-text text-2xl">D4P Player</CardTitle>
+      <Card className="bg-gray-800 border-gray-700 overflow-hidden">
+        <CardHeader className="px-3 sm:px-6 py-4 sm:py-6">
+          <CardTitle className="street-text text-xl sm:text-2xl">D4P Player</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6 px-2 sm:px-4">
+        <CardContent className="space-y-6 px-2.5 sm:px-6">
         {/* Pattern Selection */}
         <div>
           <h3 className="street-text font-semibold text-lg mb-3">Pattern</h3>
@@ -225,7 +225,7 @@ export default function BeatboxPlayer({ tune, showDrummerPov = false }: BeatboxP
 
         {/* Instrument Toggles */}
         <div>
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
             <h3 className="street-text font-semibold text-lg">Instruments</h3>
             {soloInstrument && (
               <button

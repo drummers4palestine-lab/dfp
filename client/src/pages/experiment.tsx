@@ -36,35 +36,35 @@ const PatternEditor = memo(function PatternEditor({
   }
 
   return (
-    <Card className="bg-gray-800 border-gray-700">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-lg">{instrument.name}</CardTitle>
-            <p className="text-sm text-gray-400">{instrument.description}</p>
+    <Card className="bg-gray-800 border-gray-700 overflow-hidden">
+      <CardHeader className="pb-3 px-3 sm:px-6">
+        <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <CardTitle className="text-base sm:text-lg truncate">{instrument.name}</CardTitle>
+            <p className="text-xs sm:text-sm text-gray-400 truncate">{instrument.description}</p>
           </div>
           <Button
             size="sm"
             variant="outline"
             onClick={() => onClear(instrument.key)}
-            className="text-xs"
+            className="text-xs shrink-0"
           >
             Clear
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-2 sm:px-6">
         {/* Pattern grid with 8 beats per row */}
-        <div className="space-y-2">
+        <div className="space-y-2 max-h-[380px] overflow-y-auto pr-0.5">
           {rows.map((row, rowIndex) => (
-            <div key={rowIndex} className="flex items-center justify-between overflow-x-auto px-2 sm:px-4">
+            <div key={rowIndex} className="grid grid-cols-8 gap-1 sm:gap-2 px-1 sm:px-4">
               {row.map((beatIndex) => {
                 return (
                   <div key={beatIndex} className="flex flex-col items-center">
-                    <div className="text-xs text-gray-500 mb-1">{beatIndex + 1}</div>
+                    <div className="text-[10px] sm:text-xs text-gray-500 mb-1">{beatIndex + 1}</div>
                     <button
                       type="button"
-                      className={`w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 border rounded-full text-xs font-bold transition-colors duration-150 ${
+                      className={`w-7 h-7 sm:w-8 sm:h-8 border rounded-full text-xs font-bold transition-colors duration-150 ${
                         pattern[beatIndex] === ' '
                           ? 'border-gray-600 bg-gray-800 hover:bg-gray-700 text-gray-400'
                           : pattern[beatIndex] === '.'

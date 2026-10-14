@@ -676,18 +676,18 @@ export default function DrummerPovBox({
   const rightSideWristLiftY = -rightMotion.height * 22;
 
   return (
-    <Card className="bg-gray-900 border-gray-700 shadow-2xl overflow-hidden">
-      <CardHeader className="pb-4 border-b border-gray-800 bg-gradient-to-r from-gray-900 via-black to-gray-900">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <Eye className="h-5 w-5 text-red-500" />
-              <CardTitle className="street-text text-2xl text-white">
+    <Card className="bg-gray-900 border-gray-700 shadow-2xl overflow-hidden w-full max-w-full">
+      <CardHeader className="p-3 sm:p-6 pb-3 sm:pb-4 border-b border-gray-800 bg-gradient-to-r from-gray-900 via-black to-gray-900">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+              <Eye className="h-5 w-5 text-red-500 shrink-0" />
+              <CardTitle className="street-text text-xl sm:text-2xl text-white">
                 Drummer POV Trainer
               </CardTitle>
               <Badge
                 variant="outline"
-                className="border-red-500/50 bg-red-500/10 text-red-400 text-xs"
+                className="border-red-500/50 bg-red-500/10 text-red-400 text-[11px] sm:text-xs"
               >
                 {isAgogo
                   ? "Up / Down Bell View"
@@ -698,7 +698,7 @@ export default function DrummerPovBox({
                   : "Side Height Angle"}
               </Badge>
             </div>
-            <p className="text-sm text-gray-400 mt-1">
+            <p className="text-xs sm:text-sm text-gray-400 mt-1">
               {isAgogo ? (
                 <>
                   Watch the Agogô stick move{" "}
@@ -737,10 +737,10 @@ export default function DrummerPovBox({
           </div>
 
           {/* Instrument & Sticking Controls */}
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             {/* Instrument Dropdown */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs uppercase tracking-wider text-gray-400 font-semibold">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className="text-[11px] sm:text-xs uppercase tracking-wider text-gray-400 font-semibold">
                 Instrument:
               </span>
               <Select
@@ -751,7 +751,7 @@ export default function DrummerPovBox({
               >
                 <SelectTrigger
                   data-testid="pov-instrument-select"
-                  className="w-48 bg-black border-gray-700 text-white font-medium h-9"
+                  className="w-40 sm:w-48 bg-black border-gray-700 text-white font-medium h-9 text-xs sm:text-sm"
                 >
                   <SelectValue />
                 </SelectTrigger>
@@ -771,12 +771,12 @@ export default function DrummerPovBox({
 
             {/* Pattern Selector */}
             {Object.keys(tune.patterns).length > 1 && (
-              <div className="flex items-center gap-2">
-                <span className="text-xs uppercase tracking-wider text-gray-400 font-semibold">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="text-[11px] sm:text-xs uppercase tracking-wider text-gray-400 font-semibold">
                   Section:
                 </span>
                 <Select value={selectedPattern} onValueChange={onSelectPattern}>
-                  <SelectTrigger className="w-36 bg-black border-gray-700 text-white h-9">
+                  <SelectTrigger className="w-32 sm:w-36 bg-black border-gray-700 text-white h-9 text-xs sm:text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-gray-900 border-gray-700 text-white">
@@ -796,11 +796,11 @@ export default function DrummerPovBox({
 
             {/* Right / Left Hand Lead Toggle (Hidden for Agogô since Agogô is Up/Down) */}
             {!isAgogo && (
-              <div className="flex items-center bg-black border border-gray-700 rounded-md p-0.5">
+              <div className="flex items-center bg-black border border-gray-700 rounded-md p-0.5 max-w-full">
                 <button
                   type="button"
                   onClick={() => setLeadHand("R")}
-                  className={`px-2.5 py-1 text-xs font-semibold rounded transition-colors ${
+                  className={`px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs font-semibold rounded transition-colors ${
                     leadHand === "R"
                       ? "bg-red-600 text-white"
                       : "text-gray-400 hover:text-white"
@@ -816,7 +816,7 @@ export default function DrummerPovBox({
                 <button
                   type="button"
                   onClick={() => setLeadHand("L")}
-                  className={`px-2.5 py-1 text-xs font-semibold rounded transition-colors ${
+                  className={`px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs font-semibold rounded transition-colors ${
                     leadHand === "L"
                       ? "bg-cyan-600 text-white"
                       : "text-gray-400 hover:text-white"
@@ -835,16 +835,16 @@ export default function DrummerPovBox({
         </div>
 
         {/* Speed / Playback Bar */}
-        <div className="mt-4 pt-3 border-t border-gray-800/80 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-2">
+        <div className="mt-3 sm:mt-4 pt-3 border-t border-gray-800/80 flex flex-wrap items-center justify-between gap-2.5 sm:gap-4">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             <Button
               size="sm"
               onClick={onTogglePlayPause}
-              className="bg-red-600 hover:bg-red-700 text-white min-w-[100px]"
+              className="bg-red-600 hover:bg-red-700 text-white min-w-[88px] sm:min-w-[100px]"
             >
               {!isAudioLoaded && isPlaying ? (
                 <>
-                  <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-white mr-2" />
+                  <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-white mr-1.5" />
                   Loading...
                 </>
               ) : isPlaying ? (
@@ -866,7 +866,7 @@ export default function DrummerPovBox({
                 type="button"
                 data-testid="audio-mode-full-band"
                 onClick={() => onSoloInstrumentChange(null)}
-                className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded transition-colors ${
+                className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs font-semibold rounded transition-colors ${
                   !isSolo
                     ? "bg-red-600 text-white shadow"
                     : "text-gray-400 hover:text-white"
@@ -880,7 +880,7 @@ export default function DrummerPovBox({
                 type="button"
                 data-testid="audio-mode-solo-drum"
                 onClick={() => onSoloInstrumentChange(selectedInstrument)}
-                className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded transition-colors ${
+                className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs font-semibold rounded transition-colors ${
                   isSolo
                     ? "bg-amber-500 text-black font-bold shadow"
                     : "text-gray-400 hover:text-white"
@@ -896,15 +896,15 @@ export default function DrummerPovBox({
               size="sm"
               variant="outline"
               onClick={onStop}
-              className="border-gray-700 text-gray-300 hover:bg-gray-800"
+              className="border-gray-700 text-gray-300 hover:bg-gray-800 px-2.5 sm:px-3"
             >
-              <OctagonMinus className="mr-1.5 h-4 w-4" />
+              <OctagonMinus className="mr-1 h-4 w-4" />
               Stop
             </Button>
           </div>
 
           {/* Speed Up / Slow Down Controls */}
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3 bg-black/80 border border-gray-800 px-3 py-1.5 rounded-lg">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 bg-black/80 border border-gray-800 px-2.5 sm:px-3 py-1.5 rounded-lg w-full sm:w-auto justify-between sm:justify-start">
             <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-300">
               <Gauge className="h-3.5 w-3.5 text-red-400" />
               <span>Speed:</span>
@@ -928,7 +928,7 @@ export default function DrummerPovBox({
                     key={preset.label}
                     type="button"
                     onClick={() => onTempoChange(targetBpm)}
-                    className={`px-2 py-0.5 rounded text-xs font-mono transition-colors ${
+                    className={`px-1.5 sm:px-2 py-0.5 rounded text-[11px] sm:text-xs font-mono transition-colors ${
                       isActive
                         ? "bg-red-600 text-white font-bold"
                         : "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white"
@@ -941,7 +941,7 @@ export default function DrummerPovBox({
             </div>
 
             {/* Fine step down / slider / step up */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <button
                 type="button"
                 onClick={() => onTempoChange(Math.max(30, tempo - 5))}
@@ -956,7 +956,7 @@ export default function DrummerPovBox({
                 min={30}
                 max={180}
                 step={1}
-                className="w-24 sm:w-32"
+                className="w-20 sm:w-32"
               />
               <button
                 type="button"
@@ -966,7 +966,7 @@ export default function DrummerPovBox({
               >
                 +5
               </button>
-              <span className="text-xs font-mono font-bold text-white min-w-[62px] text-right">
+              <span className="text-xs font-mono font-bold text-white min-w-[56px] sm:min-w-[62px] text-right">
                 {tempo} BPM
               </span>
             </div>
@@ -974,13 +974,13 @@ export default function DrummerPovBox({
         </div>
       </CardHeader>
 
-      <CardContent className="p-4 sm:p-6 space-y-5 bg-gradient-to-b from-black via-gray-950 to-black">
+      <CardContent className="p-2.5 sm:p-6 space-y-4 sm:space-y-5 bg-gradient-to-b from-black via-gray-950 to-black">
         {/* MAIN DRUM / AGOGO / TAMBORIM ANIMATION BOX */}
-        <div className="bg-[#050507] border border-gray-800/90 rounded-2xl p-4 relative overflow-hidden shadow-inner">
+        <div className="bg-[#050507] border border-gray-800/90 rounded-2xl p-2.5 sm:p-4 relative overflow-hidden shadow-inner">
           {/* Top Bar inside Drum Box: Left = Beat/Step Status | Right = View Toggle Button */}
           <div className="flex flex-wrap items-center justify-between gap-2 z-10 mb-2">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono uppercase tracking-wider px-2.5 py-1 rounded bg-gray-900/90 border border-gray-800 text-gray-300">
+              <span className="text-[11px] sm:text-xs font-mono uppercase tracking-wider px-2 sm:px-2.5 py-1 rounded bg-gray-900/90 border border-gray-800 text-gray-300">
                 Beat{" "}
                 <strong className="text-white">
                   {activeParsedStep?.beatNumber || 1}
@@ -990,7 +990,7 @@ export default function DrummerPovBox({
                   {activeParsedStep?.subdivisionLabel || "1"}
                 </strong>
               </span>
-              <span className="text-xs font-mono text-gray-500">
+              <span className="text-[11px] sm:text-xs font-mono text-gray-500">
                 Step {activeStepIndex + 1}/{totalSteps}
               </span>
             </div>
@@ -1002,27 +1002,27 @@ export default function DrummerPovBox({
                   type="button"
                   data-testid="toggle-top-view"
                   onClick={() => setCameraView("top")}
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold transition-all ${
+                  className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 rounded-md text-[11px] sm:text-xs font-semibold transition-all ${
                     cameraView === "top"
                       ? "bg-red-600 text-white shadow"
                       : "text-gray-400 hover:text-white"
                   }`}
                 >
                   <Eye className="h-3.5 w-3.5" />
-                  Top View (POV)
+                  Top View
                 </button>
                 <button
                   type="button"
                   data-testid="toggle-side-view"
                   onClick={() => setCameraView("side")}
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold transition-all ${
+                  className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 rounded-md text-[11px] sm:text-xs font-semibold transition-all ${
                     cameraView === "side"
                       ? "bg-red-600 text-white shadow"
                       : "text-gray-400 hover:text-white"
                   }`}
                 >
                   <Layers className="h-3.5 w-3.5" />
-                  Side View (Height)
+                  Side View
                 </button>
               </div>
             )}
@@ -2860,23 +2860,23 @@ export default function DrummerPovBox({
 
           {/* Bottom Live Hand / Bell Action Callouts */}
           {isAgogo ? (
-            <div className="grid grid-cols-2 gap-3 mt-2 max-w-xl mx-auto">
+            <div className="grid grid-cols-2 gap-2 sm:gap-3 mt-2 max-w-xl mx-auto">
               <div
-                className={`rounded-xl px-3 py-2.5 flex items-center justify-center gap-2 border transition-colors ${
+                className={`rounded-xl px-2 sm:px-3 py-2 sm:py-2.5 flex items-center justify-center gap-1.5 sm:gap-2 border transition-colors ${
                   agogoMotion.highImpact > 0.1
                     ? "bg-yellow-400/25 border-yellow-300 shadow-[0_0_16px_rgba(250,204,21,0.35)]"
                     : "bg-gray-900/90 border-yellow-400/30"
                 }`}
               >
                 <Bell
-                  className={`h-4 w-4 ${
+                  className={`h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 ${
                     agogoMotion.highImpact > 0.1
                       ? "text-yellow-200"
                       : "text-yellow-300"
                   }`}
                 />
                 <div
-                  className={`text-xs font-bold ${
+                  className={`text-[11px] sm:text-xs font-bold truncate ${
                     agogoMotion.highImpact > 0.1
                       ? "text-white"
                       : "text-yellow-200"
@@ -2887,21 +2887,21 @@ export default function DrummerPovBox({
               </div>
 
               <div
-                className={`rounded-xl px-3 py-2.5 flex items-center justify-center gap-2 border transition-colors ${
+                className={`rounded-xl px-2 sm:px-3 py-2 sm:py-2.5 flex items-center justify-center gap-1.5 sm:gap-2 border transition-colors ${
                   agogoMotion.lowImpact > 0.1
                     ? "bg-amber-500/25 border-amber-400 shadow-[0_0_16px_rgba(245,158,11,0.35)]"
                     : "bg-gray-900/90 border-amber-500/30"
                 }`}
               >
                 <Bell
-                  className={`h-4 w-4 ${
+                  className={`h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 ${
                     agogoMotion.lowImpact > 0.1
                       ? "text-amber-200"
                       : "text-amber-500"
                   }`}
                 />
                 <div
-                  className={`text-xs font-bold ${
+                  className={`text-[11px] sm:text-xs font-bold truncate ${
                     agogoMotion.lowImpact > 0.1
                       ? "text-white"
                       : "text-amber-300"
@@ -2912,21 +2912,21 @@ export default function DrummerPovBox({
               </div>
             </div>
           ) : isTamborim ? (
-            <div className="grid grid-cols-2 gap-3 mt-2 max-w-xl mx-auto">
-              <div className="bg-gray-900/90 border border-cyan-500/30 rounded-xl px-3 py-2 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Hand className="h-4 w-4 text-cyan-400 -scale-x-100" />
-                  <div className="text-xs font-bold text-cyan-300">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mt-2 max-w-xl mx-auto">
+              <div className="bg-gray-900/90 border border-cyan-500/30 rounded-xl px-2.5 sm:px-3 py-2 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                  <Hand className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-cyan-400 -scale-x-100 shrink-0" />
+                  <div className="text-[11px] sm:text-xs font-bold text-cyan-300 truncate">
                     LEFT HAND (L)
                   </div>
                 </div>
                 {leadHand === "R" ? (
-                  <span className="px-2 py-0.5 rounded text-xs font-mono font-bold bg-cyan-950/70 text-cyan-300 border border-cyan-500/30">
+                  <span className="px-2 py-0.5 rounded text-[10px] sm:text-xs font-mono font-bold bg-cyan-950/70 text-cyan-300 border border-cyan-500/30 shrink-0">
                     HOLDING DRUM
                   </span>
                 ) : (
                   <span
-                    className={`px-2 py-0.5 rounded text-xs font-mono font-bold border ${
+                    className={`px-2 py-0.5 rounded text-[10px] sm:text-xs font-mono font-bold border shrink-0 ${
                       tamborimMotion.phaseLabel === "STICK HIT!"
                         ? "bg-cyan-500 text-black border-cyan-400"
                         : tamborimMotion.phaseLabel === "LIFT"
@@ -2939,20 +2939,20 @@ export default function DrummerPovBox({
                 )}
               </div>
 
-              <div className="bg-gray-900/90 border border-red-500/30 rounded-xl px-3 py-2 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Hand className="h-4 w-4 text-red-400" />
-                  <div className="text-xs font-bold text-red-300">
+              <div className="bg-gray-900/90 border border-red-500/30 rounded-xl px-2.5 sm:px-3 py-2 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                  <Hand className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-red-400 shrink-0" />
+                  <div className="text-[11px] sm:text-xs font-bold text-red-300 truncate">
                     RIGHT HAND (R)
                   </div>
                 </div>
                 {leadHand === "L" ? (
-                  <span className="px-2 py-0.5 rounded text-xs font-mono font-bold bg-red-950/70 text-red-300 border border-red-500/30">
+                  <span className="px-2 py-0.5 rounded text-[10px] sm:text-xs font-mono font-bold bg-red-950/70 text-red-300 border border-red-500/30 shrink-0">
                     HOLDING DRUM
                   </span>
                 ) : (
                   <span
-                    className={`px-2 py-0.5 rounded text-xs font-mono font-bold border ${
+                    className={`px-2 py-0.5 rounded text-[10px] sm:text-xs font-mono font-bold border shrink-0 ${
                       tamborimMotion.phaseLabel === "STICK HIT!"
                         ? "bg-red-600 text-white border-red-500"
                         : tamborimMotion.phaseLabel === "LIFT"
@@ -2966,16 +2966,16 @@ export default function DrummerPovBox({
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3 mt-2 max-w-xl mx-auto">
-              <div className="bg-gray-900/90 border border-cyan-500/30 rounded-xl px-3 py-2 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Hand className="h-4 w-4 text-cyan-400 -scale-x-100" />
-                  <div className="text-xs font-bold text-cyan-300">
-                    LEFT HAND (L)
+            <div className="grid grid-cols-2 gap-2 sm:gap-3 mt-2 max-w-xl mx-auto">
+              <div className="bg-gray-900/90 border border-cyan-500/30 rounded-xl px-2.5 sm:px-3 py-2 flex items-center justify-between gap-1.5">
+                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                  <Hand className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-cyan-400 -scale-x-100 shrink-0" />
+                  <div className="text-[11px] sm:text-xs font-bold text-cyan-300 truncate">
+                    LEFT (L)
                   </div>
                 </div>
                 <span
-                  className={`px-2 py-0.5 rounded text-xs font-mono font-bold border ${
+                  className={`px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-xs font-mono font-bold border shrink-0 ${
                     leftMotion.phaseLabel === "ACCENT" ||
                     leftMotion.phaseLabel === "FLAM"
                       ? "bg-cyan-500 text-black border-cyan-400"
@@ -2990,15 +2990,15 @@ export default function DrummerPovBox({
                 </span>
               </div>
 
-              <div className="bg-gray-900/90 border border-red-500/30 rounded-xl px-3 py-2 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Hand className="h-4 w-4 text-red-400" />
-                  <div className="text-xs font-bold text-red-300">
-                    RIGHT HAND (R)
+              <div className="bg-gray-900/90 border border-red-500/30 rounded-xl px-2.5 sm:px-3 py-2 flex items-center justify-between gap-1.5">
+                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                  <Hand className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-red-400 shrink-0" />
+                  <div className="text-[11px] sm:text-xs font-bold text-red-300 truncate">
+                    RIGHT (R)
                   </div>
                 </div>
                 <span
-                  className={`px-2 py-0.5 rounded text-xs font-mono font-bold border ${
+                  className={`px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-xs font-mono font-bold border shrink-0 ${
                     rightMotion.phaseLabel === "ACCENT" ||
                     rightMotion.phaseLabel === "FLAM"
                       ? "bg-red-600 text-white border-red-500"
@@ -3017,15 +3017,15 @@ export default function DrummerPovBox({
         </div>
 
         {/* STEP-BY-STEP STICKING BREAKDOWN (Single Compact Horizontal Row so it never pushes the screen down) */}
-        <div className="bg-[#07080d] border border-gray-800 rounded-2xl p-3">
-          <div className="flex items-center justify-between mb-2">
-            <h4 className="text-xs font-mono uppercase tracking-wider text-gray-300 font-bold">
+        <div className="bg-[#07080d] border border-gray-800 rounded-2xl p-2.5 sm:p-3">
+          <div className="flex flex-wrap items-center justify-between gap-1 mb-2">
+            <h4 className="text-[11px] sm:text-xs font-mono uppercase tracking-wider text-gray-300 font-bold">
               {isAgogo
                 ? "Up / Down Bell Grid (Agogô)"
                 : `Sticking & Stroke Grid (${currentInstrumentMeta.label})`}
             </h4>
-            <span className="text-[11px] text-gray-400">
-              Click any step while paused to inspect position
+            <span className="text-[10px] sm:text-[11px] text-gray-400">
+              Tap step while paused to inspect
             </span>
           </div>
 

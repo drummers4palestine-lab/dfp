@@ -257,9 +257,9 @@ export default function PatternVisualizer({
 
     const containerRect = container.getBoundingClientRect();
     const stepRect = stepEl.getBoundingClientRect();
-    // Account for the sticky left instrument label column (~140px)
-    const stickyColumnWidth = 148;
-    const visibleWidth = containerRect.width - stickyColumnWidth;
+    // Account for the sticky left instrument label column (96px on mobile, ~148px on desktop)
+    const stickyColumnWidth = containerRect.width < 640 ? 100 : 148;
+    const visibleWidth = Math.max(80, containerRect.width - stickyColumnWidth);
     const stepCenterRelativeToViewport =
       stepRect.left - containerRect.left - stickyColumnWidth + stepRect.width / 2;
 
@@ -282,30 +282,30 @@ export default function PatternVisualizer({
   }
 
   return (
-    <div className="bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 p-3 sm:p-5 rounded-xl shadow-2xl border border-gray-800 space-y-4">
+    <div className="w-full max-w-full overflow-hidden bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 p-2.5 sm:p-5 rounded-xl shadow-2xl border border-gray-800 space-y-3 sm:space-y-4">
       {/* Top Header Bar: Live Status + Active Instrument Pills */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-gray-800/80">
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-2 bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-lg">
+      <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 pb-2.5 sm:pb-3 border-b border-gray-800/80">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+          <div className="flex items-center gap-1.5 sm:gap-2 bg-gray-900 border border-gray-800 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg">
             <span
-              className={`w-2.5 h-2.5 rounded-full ${
+              className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full ${
                 isPlaying
                   ? "bg-red-500 animate-pulse shadow-[0_0_8px_#ef4444]"
                   : "bg-emerald-500"
               }`}
             />
-            <span className="text-xs font-mono font-bold text-gray-200">
+            <span className="text-[11px] sm:text-xs font-mono font-bold text-gray-200">
               STEP {String(currentStep + 1).padStart(2, "0")} / {patternLength}
             </span>
             {totalBars > 1 && (
-              <span className="text-xs font-mono text-amber-400 border-l border-gray-700 pl-2">
-                BAR {activeBarIndex + 1} OF {totalBars}
+              <span className="text-[11px] sm:text-xs font-mono text-amber-400 border-l border-gray-700 pl-2">
+                BAR {activeBarIndex + 1}/{totalBars}
               </span>
             )}
           </div>
 
           {/* Active Instrument Pills */}
-          <div className="flex items-center gap-1.5 flex-wrap">
+          <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
             {resolvedTracks.map((track) => {
               const char =
                 track.raw[currentStep % Math.max(track.raw.length, 1)] || " ";
@@ -332,7 +332,7 @@ export default function PatternVisualizer({
           </div>
         </div>
 
-        <div className="text-[11px] font-mono text-gray-400">
+        <div className="text-[11px] font-mono text-gray-400 hidden sm:block">
           Auto-Scrolling Timeline
         </div>
       </div>
@@ -340,15 +340,15 @@ export default function PatternVisualizer({
       {/* Full Auto-Scrolling Horizontal Timeline View */}
       <div
         ref={scrollContainerRef}
-        className="overflow-x-auto rounded-xl border border-gray-800 bg-gray-950/80 p-2 sm:p-3"
+        className="w-full overflow-x-auto rounded-xl border border-gray-800 bg-gray-950/80 p-1.5 sm:p-3"
       >
-        <div className="inline-flex flex-col min-w-full space-y-1.5">
+        <div className="inline-flex flex-col min-w-full space-y-1 sm:space-y-1.5">
           {/* Bar & Step Header Row */}
-          <div className="flex items-center gap-2 sm:gap-3 mb-1">
-            <div className="sticky left-0 z-20 w-28 sm:w-36 shrink-0 bg-gray-950/95 backdrop-blur-sm py-1.5 px-2 rounded-l border-r border-gray-800 text-[11px] font-mono uppercase tracking-wider text-gray-400 font-bold">
+          <div className="flex items-center gap-1.5 sm:gap-3 mb-1">
+            <div className="sticky left-0 z-20 w-24 sm:w-36 shrink-0 bg-gray-950/95 backdrop-blur-sm py-1.5 px-1.5 sm:px-2 rounded-l border-r border-gray-800 text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-gray-400 font-bold truncate">
               Instrument
             </div>
-            <div className="flex gap-1 sm:gap-1.5 pr-4">
+            <div className="flex gap-1 sm:gap-1.5 pr-3 sm:pr-4">
               {Array.from({ length: patternLength }, (_, stepIndex) => {
                 const isPlayhead = stepIndex === currentStep;
                 const isBarStart = stepIndex % stepsPerBar === 0;
@@ -363,11 +363,11 @@ export default function PatternVisualizer({
                     ref={(el) => {
                       stepHeaderRefs.current[stepIndex] = el;
                     }}
-                    className={`relative w-8 sm:w-9 h-8 flex flex-col items-center justify-center font-mono rounded-md shrink-0 transition-all duration-100 ${
+                    className={`relative w-7 sm:w-9 h-7 sm:h-8 flex flex-col items-center justify-center font-mono rounded-md shrink-0 transition-all duration-100 ${
                       isBarStart && stepIndex > 0
-                        ? "ml-3 before:content-[''] before:absolute before:-left-2 before:top-0 before:bottom-0 before:w-0.5 before:bg-amber-500/40"
+                        ? "ml-2 sm:ml-3 before:content-[''] before:absolute before:-left-1.5 sm:before:-left-2 before:top-0 before:bottom-0 before:w-0.5 before:bg-amber-500/40"
                         : isBeatStart && stepIndex > 0
-                        ? "ml-1"
+                        ? "ml-0.5 sm:ml-1"
                         : ""
                     } ${
                       isPlayhead
@@ -384,7 +384,7 @@ export default function PatternVisualizer({
                     </span>
                     {isBarStart ? (
                       <span
-                        className={`text-[8px] leading-none mt-0.5 font-extrabold ${
+                        className={`text-[7px] sm:text-[8px] leading-none mt-0.5 font-extrabold ${
                           isPlayhead ? "text-white" : "text-amber-400"
                         }`}
                       >
@@ -392,7 +392,7 @@ export default function PatternVisualizer({
                       </span>
                     ) : isBeatStart ? (
                       <span
-                        className={`text-[8px] leading-none mt-0.5 ${
+                        className={`text-[7px] sm:text-[8px] leading-none mt-0.5 ${
                           isPlayhead ? "text-red-100" : "text-gray-400"
                         }`}
                       >
@@ -415,7 +415,7 @@ export default function PatternVisualizer({
             return (
               <div
                 key={track.key}
-                className={`flex items-center gap-2 sm:gap-3 py-1 rounded-lg transition-colors ${
+                className={`flex items-center gap-1.5 sm:gap-3 py-0.5 sm:py-1 rounded-lg transition-colors ${
                   !track.enabled
                     ? "opacity-40 bg-gray-900/30"
                     : isCurrentStepHit
@@ -424,10 +424,10 @@ export default function PatternVisualizer({
                 }`}
               >
                 {/* Sticky Left Instrument Badge */}
-                <div className="sticky left-0 z-20 w-28 sm:w-36 shrink-0 bg-gray-950/95 backdrop-blur-sm py-1.5 px-2.5 rounded-l flex items-center justify-between border-r border-gray-800">
-                  <div className="flex items-center gap-2 min-w-0">
+                <div className="sticky left-0 z-20 w-24 sm:w-36 shrink-0 bg-gray-950/95 backdrop-blur-sm py-1 sm:py-1.5 px-1.5 sm:px-2.5 rounded-l flex items-center justify-between border-r border-gray-800">
+                  <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
                     <span
-                      className={`w-2.5 h-2.5 rounded-full shrink-0 transition-transform duration-100 ${
+                      className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full shrink-0 transition-transform duration-100 ${
                         isCurrentStepHit ? "scale-150" : "scale-100"
                       }`}
                       style={{
@@ -438,7 +438,7 @@ export default function PatternVisualizer({
                       }}
                     />
                     <div className="truncate">
-                      <div className="text-xs sm:text-sm font-bold text-white leading-tight truncate">
+                      <div className="text-[11px] sm:text-sm font-bold text-white leading-tight truncate">
                         {track.name}
                       </div>
                       <div className="text-[10px] text-gray-500 hidden sm:block truncate">
@@ -451,13 +451,13 @@ export default function PatternVisualizer({
                       title="Instrument Muted"
                       className="text-gray-500 shrink-0 ml-1"
                     >
-                      <VolumeX className="w-3.5 h-3.5" />
+                      <VolumeX className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                     </span>
                   )}
                 </div>
 
                 {/* Step Cells */}
-                <div className="flex gap-1 sm:gap-1.5 pr-4 items-center">
+                <div className="flex gap-1 sm:gap-1.5 pr-3 sm:pr-4 items-center">
                   {Array.from({ length: patternLength }, (_, stepIndex) => {
                     const trackLen = track.raw.length || 16;
                     const char = track.raw[stepIndex % trackLen] || " ";
@@ -470,11 +470,11 @@ export default function PatternVisualizer({
                       <div
                         key={stepIndex}
                         title={`${track.name} • Step ${stepIndex + 1}: ${stroke.title}`}
-                        className={`relative w-8 sm:w-9 h-8 sm:h-9 rounded-md flex items-center justify-center select-none shrink-0 transition-all duration-100 ${
+                        className={`relative w-7 sm:w-9 h-7 sm:h-9 rounded-md flex items-center justify-center select-none shrink-0 transition-all duration-100 ${
                           isBarStart && stepIndex > 0
-                            ? "ml-3 before:content-[''] before:absolute before:-left-2 before:top-0 before:bottom-0 before:w-0.5 before:bg-amber-500/25"
+                            ? "ml-2 sm:ml-3 before:content-[''] before:absolute before:-left-1.5 sm:before:-left-2 before:top-0 before:bottom-0 before:w-0.5 before:bg-amber-500/25"
                             : isBeatStart && stepIndex > 0
-                            ? "ml-1"
+                            ? "ml-0.5 sm:ml-1"
                             : ""
                         } ${
                           isPlayhead
@@ -495,7 +495,7 @@ export default function PatternVisualizer({
                         {/* Ghost / Tap Note ('.') */}
                         {stroke.type === "ghost" && (
                           <div
-                            className={`w-4/5 h-4 rounded flex items-center justify-center text-[10px] font-bold border transition-transform ${
+                            className={`w-4/5 h-3.5 sm:h-4 rounded flex items-center justify-center text-[10px] font-bold border transition-transform ${
                               track.bgGhost
                             } ${
                               isPlayhead && track.enabled
@@ -507,10 +507,10 @@ export default function PatternVisualizer({
                           </div>
                         )}
 
-                        {/* Agogô High Bell ('o') vs Low Bell ('a') */}
+                        {/* Agogô High Bell ('a') vs Low Bell ('o') */}
                         {stroke.type === "high-bell" && (
                           <div
-                            className={`w-full h-4.5 self-start rounded-t-md rounded-b-sm flex items-center justify-center text-[10px] sm:text-xs font-extrabold border ${
+                            className={`w-full h-4 sm:h-4.5 self-start rounded-t-md rounded-b-sm flex items-center justify-center text-[10px] sm:text-xs font-extrabold border ${
                               track.bgActive
                             } ${
                               isPlayhead && track.enabled
@@ -518,13 +518,13 @@ export default function PatternVisualizer({
                                 : ""
                             }`}
                           >
-                            o
+                            {stroke.label}
                           </div>
                         )}
 
                         {stroke.type === "low-bell" && (
                           <div
-                            className={`w-full h-4.5 self-end rounded-b-md rounded-t-sm flex items-center justify-center text-[10px] sm:text-xs font-extrabold border ${
+                            className={`w-full h-4 sm:h-4.5 self-end rounded-b-md rounded-t-sm flex items-center justify-center text-[10px] sm:text-xs font-extrabold border ${
                               track.bgActive
                             } opacity-90 ${
                               isPlayhead && track.enabled
@@ -532,14 +532,14 @@ export default function PatternVisualizer({
                                 : ""
                             }`}
                           >
-                            a
+                            {stroke.label}
                           </div>
                         )}
 
                         {/* Special Stroke (flam 'f', rim 'r', hand 'h', slap 's', muted '0', buzz 'z') */}
                         {stroke.type === "special" && (
                           <div
-                            className={`w-full h-7 rounded-md flex items-center justify-center text-[11px] sm:text-xs font-black uppercase border-2 border-dashed ${
+                            className={`w-full h-6 sm:h-7 rounded-md flex items-center justify-center text-[10px] sm:text-xs font-black uppercase border-2 border-dashed ${
                               track.bgGhost
                             } ${
                               isPlayhead && track.enabled
@@ -554,7 +554,7 @@ export default function PatternVisualizer({
                         {/* Full Accent Hit ('X') */}
                         {stroke.type === "accent" && (
                           <div
-                            className={`w-full h-full rounded-md flex items-center justify-center text-[11px] sm:text-xs font-extrabold border transition-transform ${
+                            className={`w-full h-full rounded-md flex items-center justify-center text-[10px] sm:text-xs font-extrabold border transition-transform ${
                               track.bgActive
                             } ${
                               isPlayhead && track.enabled
@@ -576,38 +576,38 @@ export default function PatternVisualizer({
       </div>
 
       {/* Legend & Layer Count Footer */}
-      <div className="pt-2 border-t border-gray-800/80 flex flex-wrap items-center justify-between gap-3 text-xs text-gray-400">
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+      <div className="pt-2 border-t border-gray-800/80 flex flex-wrap items-center justify-between gap-2 sm:gap-3 text-[11px] sm:text-xs text-gray-400">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-gray-500">
             Notation:
           </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="w-4 h-4 rounded bg-emerald-500 text-black font-extrabold text-[10px] flex items-center justify-center">
+          <span className="inline-flex items-center gap-1 sm:gap-1.5">
+            <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded bg-emerald-500 text-black font-extrabold text-[9px] sm:text-[10px] flex items-center justify-center">
               X
             </span>
             <span>Accent / Hit</span>
           </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="w-4 h-3 rounded bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 font-bold text-[10px] flex items-center justify-center">
+          <span className="inline-flex items-center gap-1 sm:gap-1.5">
+            <span className="w-3.5 h-3 sm:w-4 sm:h-3 rounded bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 font-bold text-[9px] sm:text-[10px] flex items-center justify-center">
               •
             </span>
             <span>Ghost Tap (.)</span>
           </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="w-4 h-4 rounded border border-dashed border-rose-400 bg-rose-500/20 text-rose-300 font-bold text-[10px] flex items-center justify-center">
+          <span className="inline-flex items-center gap-1 sm:gap-1.5">
+            <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded border border-dashed border-rose-400 bg-rose-500/20 text-rose-300 font-bold text-[9px] sm:text-[10px] flex items-center justify-center">
               f/r
             </span>
-            <span>Flam / Rim / Hand</span>
+            <span>Flam / Rim</span>
           </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="w-4 h-4 rounded bg-yellow-400 text-black font-extrabold text-[10px] flex items-center justify-center">
-              o/a
+          <span className="inline-flex items-center gap-1 sm:gap-1.5">
+            <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded bg-yellow-400 text-black font-extrabold text-[9px] sm:text-[10px] flex items-center justify-center">
+              a/o
             </span>
             <span>High / Low Bell</span>
           </span>
         </div>
 
-        <div className="text-[11px] text-gray-500">
+        <div className="text-[10px] sm:text-[11px] text-gray-500">
           {resolvedTracks.length} active instrument
           {resolvedTracks.length === 1 ? "" : "s"} layered
         </div>

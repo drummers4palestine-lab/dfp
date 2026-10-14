@@ -108,12 +108,12 @@ const ProtestBeatPlayer = forwardRef<ProtestBeatPlayerRef, ProtestBeatPlayerProp
   }
 
   return (
-    <Card className="bg-gray-800 border-gray-700">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold text-white">{tune.displayName || tune.name}</CardTitle>
-        {tune.description && <p className="text-gray-300">{tune.description}</p>}
+    <Card className="bg-gray-800 border-gray-700 overflow-hidden">
+      <CardHeader className="px-3 sm:px-6">
+        <CardTitle className="text-xl sm:text-2xl font-bold text-white">{tune.displayName || tune.name}</CardTitle>
+        {tune.description && <p className="text-sm sm:text-base text-gray-300">{tune.description}</p>}
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 px-2.5 sm:px-6">
         {/* Controls */}
         <div>
           <h3 className="street-text font-semibold text-lg mb-3">Controls</h3>
