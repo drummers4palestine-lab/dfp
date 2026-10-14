@@ -491,8 +491,6 @@ export default function DrummerPovBox({
   const [leadHand, setLeadHand] = useState<"R" | "L">("R");
   const [cameraView, setCameraView] = useState<CameraViewMode>("top");
   const [inspectedStep, setInspectedStep] = useState<number | null>(null);
-  const gridScrollRef = useRef<HTMLDivElement | null>(null);
-  const prevGridStepRef = useRef<number>(0);
 
   const isSolo = soloInstrument !== null;
   const isAgogo = selectedInstrument === "ag";
@@ -624,29 +622,6 @@ export default function DrummerPovBox({
   );
   const activeParsedStep = parsedSteps[activeStepIndex] || parsedSteps[0];
   const baseTuneTempo = tune.speed || 120;
-
-  // Auto-scroll the horizontal Sticking & Stroke Grid without ever scrolling the page vertically
-  useEffect(() => {
-    const container = gridScrollRef.current;
-    if (!container) return;
-
-    const didWrap =
-      activeStepIndex === 0 || activeStepIndex < prevGridStepRef.current;
-    prevGridStepRef.current = activeStepIndex;
-
-    if (didWrap) {
-      container.scrollLeft = 0;
-      return;
-    }
-
-    const stepWidth = 36; // w-8 (32px) + gap-1 (4px)
-    const targetLeft =
-      activeStepIndex * stepWidth - container.clientWidth * 0.45;
-    container.scrollTo({
-      left: Math.max(0, targetLeft),
-      behavior: isPlaying ? "smooth" : "auto",
-    });
-  }, [activeStepIndex, isPlaying]);
 
   const currentInstrumentMeta =
     DRUM_INSTRUMENTS.find((d) => d.key === selectedInstrument) ||
@@ -3016,7 +2991,7 @@ export default function DrummerPovBox({
           )}
         </div>
 
-        {/* STEP-BY-STEP STICKING BREAKDOWN (Single Compact Horizontal Row so it never pushes the screen down) */}
+        {/* STEP-BY-STEP STICKING BREAKDOWN (Rendered in full without scrolling) */}
         <div className="bg-[#07080d] border border-gray-800 rounded-2xl p-2.5 sm:p-3">
           <div className="flex flex-wrap items-center justify-between gap-1 mb-2">
             <h4 className="text-[11px] sm:text-xs font-mono uppercase tracking-wider text-gray-300 font-bold">
@@ -3029,8 +3004,7 @@ export default function DrummerPovBox({
             </span>
           </div>
 
-          <div ref={gridScrollRef} className="overflow-x-auto pb-1">
-            <div className="flex gap-1 min-w-max py-0.5">
+          <div className="grid grid-cols-8 sm:grid-cols-[repeat(16,minmax(0,1fr))] gap-1 py-0.5">
               {parsedSteps.map((st) => {
                 const isCurrent = st.index === activeStepIndex;
                 const isHighBell = st.stroke === "highBell";
@@ -3048,7 +3022,7 @@ export default function DrummerPovBox({
                     key={st.index}
                     type="button"
                     onClick={() => setInspectedStep(st.index)}
-                    className={`w-8 shrink-0 flex flex-col items-center py-1 px-0.5 rounded-lg border transition-colors ${
+                    className={`w-full flex flex-col items-center py-1 px-0.5 rounded-lg border transition-colors ${
                       isCurrent
                         ? "bg-red-600/25 border-red-500 shadow-sm shadow-red-500/20"
                         : isBeatStart
@@ -3128,7 +3102,6 @@ export default function DrummerPovBox({
                   </button>
                 );
               })}
-            </div>
           </div>
 
           {patternObj?.mnemonics?.[selectedInstrument] && (

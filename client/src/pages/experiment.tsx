@@ -55,7 +55,7 @@ const PatternEditor = memo(function PatternEditor({
       </CardHeader>
       <CardContent className="px-2 sm:px-6">
         {/* Pattern grid with 8 beats per row */}
-        <div className="space-y-2 max-h-[380px] overflow-y-auto pr-0.5">
+        <div className="space-y-2">
           {rows.map((row, rowIndex) => (
             <div key={rowIndex} className="grid grid-cols-8 gap-1 sm:gap-2 px-1 sm:px-4">
               {row.map((beatIndex) => {
