@@ -877,8 +877,8 @@ export const tunes: Tune[] = [
     },
   },
   {
-    name: "BadDuckSong",
-    displayName: "Bad Duck Song",
+    name: "BadDuck",
+    displayName: "Bad Duck",
     categories: ["new", "tricky"],
     speed: 110,
     time: 4,
