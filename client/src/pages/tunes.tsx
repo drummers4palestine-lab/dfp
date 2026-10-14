@@ -44,7 +44,7 @@ export default function Tunes() {
 
           {/* Beatbox Player */}
           <div className="lg:col-span-3">
-            <BeatboxPlayer tune={selectedTune} />
+            <BeatboxPlayer tune={selectedTune} showDrummerPov />
           </div>
         </div>
       </div>

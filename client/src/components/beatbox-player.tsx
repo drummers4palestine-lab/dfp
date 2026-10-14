@@ -7,14 +7,16 @@ import { Play, Pause, OctagonMinus } from "lucide-react";
 import PatternVisualizer from "./pattern-visualizer";
 import InstrumentToggle from "./instrument-toggle";
 import AudioContextWarning from "./audio-context-warning";
+import DrummerPovBox from "./drummer-pov-box";
 import { useAudioEngine } from "@/lib/audio-engine";
 import type { Tune } from "@/data/tunes";
 
 interface BeatboxPlayerProps {
   tune: Tune;
+  showDrummerPov?: boolean;
 }
 
-export default function BeatboxPlayer({ tune }: BeatboxPlayerProps) {
+export default function BeatboxPlayer({ tune, showDrummerPov = false }: BeatboxPlayerProps) {
   // Automatically select the first available pattern
   const firstPatternName = Object.keys(tune.patterns)[0] || "Tune";
   const [selectedPattern, setSelectedPattern] = useState(firstPatternName);
@@ -40,6 +42,11 @@ export default function BeatboxPlayer({ tune }: BeatboxPlayerProps) {
       setSelectedPattern(firstPattern);
     }
   }, [tune, selectedPattern]);
+
+  // Reset tempo when tune changes
+  useEffect(() => {
+    setTempo(tune.speed || 120);
+  }, [tune]);
 
   const { isPlaying, isAudioLoaded, play, pause, stop } = useAudioEngine({
     tune,
@@ -76,8 +83,24 @@ export default function BeatboxPlayer({ tune }: BeatboxPlayerProps) {
   if (!pattern) return null;
 
   return (
-    <>
+    <div className="space-y-8">
       <AudioContextWarning />
+
+      {showDrummerPov && (
+        <DrummerPovBox
+          tune={tune}
+          selectedPattern={selectedPattern}
+          onSelectPattern={setSelectedPattern}
+          tempo={tempo}
+          onTempoChange={setTempo}
+          isPlaying={isPlaying}
+          isAudioLoaded={isAudioLoaded}
+          currentStep={currentStep}
+          onTogglePlayPause={togglePlayPause}
+          onStop={stop}
+        />
+      )}
+
       <Card className="bg-gray-800 border-gray-700">
         <CardHeader>
           <CardTitle className="street-text text-2xl">D4P Player</CardTitle>
@@ -142,8 +165,8 @@ export default function BeatboxPlayer({ tune }: BeatboxPlayerProps) {
               <Slider
                 value={[tempo]}
                 onValueChange={(value) => setTempo(value[0])}
-                min={40}
-                max={160}
+                min={30}
+                max={180}
                 step={1}
                 className="w-24"
               />
@@ -262,6 +285,6 @@ export default function BeatboxPlayer({ tune }: BeatboxPlayerProps) {
         </div>
       </CardContent>
     </Card>
-    </>
+    </div>
   );
 }
