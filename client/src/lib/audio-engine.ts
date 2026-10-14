@@ -23,43 +23,59 @@ export function useAudioEngine({
   onStepChange,
 }: AudioEngineOptions) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentStep, setCurrentStep] = useState(0);
   const [isAudioLoaded, setIsAudioLoaded] = useState(false);
   const audioContextRef = useRef<AudioContext | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const soundsRef = useRef<Record<string, AudioBuffer>>({});
   const audioLoadedRef = useRef<boolean>(false);
+  const currentStepRef = useRef<number>(0);
 
 
 
   // Function to determine which audio files a tune actually needs
+  // Always include core samples for all instruments so dynamic pattern editing
+  // (e.g. on the Experimental page) never falls back to synthetic sounds.
   const getRequiredAudioFiles = useCallback((tune: Tune) => {
-    const requiredFiles = new Set<string>();
-
-    // Analyze all patterns in the tune to see what instruments are used
-    Object.values(tune.patterns).forEach((pattern) => {
-      // Check each instrument pattern for non-empty characters
-      if (pattern.ls && pattern.ls.replace(/\s/g, ""))
-        requiredFiles.add("ls_73");
-      if (pattern.ms && pattern.ms.replace(/\s/g, ""))
-        requiredFiles.add("ls_73"); // MS uses same as LS
-      if (pattern.hs && pattern.hs.replace(/\s/g, ""))
-        requiredFiles.add("hs_74");
-      if (pattern.re && pattern.re.replace(/\s/g, ""))
-        requiredFiles.add("re_58");
-      if (pattern.sn && pattern.sn.replace(/\s/g, "")) {
-        requiredFiles.add("sn_58"); // Accent
-        requiredFiles.add("sn_2e"); // Ghost note
-      }
-      if (pattern.ta && pattern.ta.replace(/\s/g, ""))
-        requiredFiles.add("ta_58");
-      if (pattern.ag && pattern.ag.replace(/\s/g, "")) {
-        requiredFiles.add("ag_61"); // Low bell
-        requiredFiles.add("ag_6f"); // High bell
-      }
-      if (pattern.sh && pattern.sh.replace(/\s/g, ""))
-        requiredFiles.add("sh_2e");
-    });
+    const requiredFiles = new Set<string>([
+      // Core Surdos
+      "ls_73",
+      "ls_58",
+      "ls_30",
+      "ls_72",
+      "ms_73",
+      "ms_58",
+      "ms_30",
+      "ms_72",
+      "hs_74",
+      "hs_73",
+      "hs_58",
+      "hs_30",
+      "hs_72",
+      // Core Repinique strokes
+      "re_58",
+      "re_2e",
+      "re_66",
+      "re_68",
+      "re_72",
+      "re_73",
+      "re_7a",
+      // Core Snare strokes (Accent, Ghost/Tap, Flam, Rim)
+      "sn_58",
+      "sn_2e",
+      "sn_66",
+      "sn_72",
+      // Core Tamborim, Agogo, Shaker
+      "ta_58",
+      "ta_66",
+      "ta_72",
+      "ag_61",
+      "ag_6f",
+      "ag_2e",
+      "ag_72",
+      "sh_58",
+      "sh_2e",
+      "ot_77",
+    ]);
 
     return Array.from(requiredFiles);
   }, []);
@@ -261,19 +277,45 @@ export function useAudioEngine({
     // Store individual agogo sounds for pattern-specific playback
     soundsRef.current.ag_low = audioBuffers.ag_61 || soundsRef.current.ag; // 'a' character
     soundsRef.current.ag_high = audioBuffers.ag_6f || soundsRef.current.ag; // 'o' character
+    soundsRef.current.ag_ghost = audioBuffers.ag_2e || soundsRef.current.ag; // '.' character
+    soundsRef.current.ag_rim = audioBuffers.ag_72 || soundsRef.current.ag; // 'r' character
 
     // Store individual snare sounds for pattern-specific playback
     soundsRef.current.sn_accent = audioBuffers.sn_58 || soundsRef.current.sn; // 'X' character
     soundsRef.current.sn_ghost = audioBuffers.sn_2e || soundsRef.current.sn; // '.' character
+    soundsRef.current.sn_flam = audioBuffers.sn_66 || soundsRef.current.sn; // 'f' character
+    soundsRef.current.sn_rim = audioBuffers.sn_72 || soundsRef.current.sn; // 'r' character
+
+    // Store individual repi sounds for pattern-specific playback
+    soundsRef.current.re_accent = audioBuffers.re_58 || soundsRef.current.re; // 'X' character
+    soundsRef.current.re_ghost = audioBuffers.re_2e || soundsRef.current.re; // '.' character
+    soundsRef.current.re_flam = audioBuffers.re_66 || soundsRef.current.re; // 'f' character
+    soundsRef.current.re_hand = audioBuffers.re_68 || soundsRef.current.re; // 'h' character
+    soundsRef.current.re_rim = audioBuffers.re_72 || soundsRef.current.re; // 'r' character
+    soundsRef.current.re_slap = audioBuffers.re_73 || soundsRef.current.re; // 's' character
+    soundsRef.current.re_buzz = audioBuffers.re_7a || soundsRef.current.re; // 'z' character
+
+    // Store individual tamborim and shaker sounds
+    soundsRef.current.ta_accent = audioBuffers.ta_58 || soundsRef.current.ta; // 'X' character
+    soundsRef.current.ta_flam = audioBuffers.ta_66 || soundsRef.current.ta; // 'f' character
+    soundsRef.current.ta_rim = audioBuffers.ta_72 || soundsRef.current.ta; // 'r' character
+    soundsRef.current.sh_accent = audioBuffers.sh_58 || soundsRef.current.sh; // 'X' character
+    soundsRef.current.sh_ghost = audioBuffers.sh_2e || soundsRef.current.sh; // '.' character
 
     // Store additional surdo variations if available
-    soundsRef.current.ls_open = audioBuffers.ls_30 || soundsRef.current.ls; // open sound
-    soundsRef.current.ls_muted = audioBuffers.ls_58 || soundsRef.current.ls; // muted sound
-    soundsRef.current.ms_open = audioBuffers.ms_30 || soundsRef.current.ms; // open sound
-    soundsRef.current.ms_muted = audioBuffers.ms_58 || soundsRef.current.ms; // muted sound
-    soundsRef.current.hs_open = audioBuffers.hs_30 || soundsRef.current.hs; // open sound
-    soundsRef.current.hs_muted = audioBuffers.hs_58 || soundsRef.current.hs; // muted sound
-  }, [tune, getRequiredAudioFiles, loadAudioFile]);
+    soundsRef.current.ls_open = audioBuffers.ls_30 || soundsRef.current.ls; // '0' damp sound
+    soundsRef.current.ls_muted = audioBuffers.ls_58 || soundsRef.current.ls; // 'X' hit sound
+    soundsRef.current.ls_rim = audioBuffers.ls_72 || soundsRef.current.ls; // 'r' rim sound
+    soundsRef.current.ls_slap = audioBuffers.ls_73 || soundsRef.current.ls; // 's' slap sound
+    soundsRef.current.ms_open = audioBuffers.ms_30 || soundsRef.current.ms; // '0' damp sound
+    soundsRef.current.ms_muted = audioBuffers.ms_58 || soundsRef.current.ms; // 'X' hit sound
+    soundsRef.current.ms_rim = audioBuffers.ms_72 || soundsRef.current.ms; // 'r' rim sound
+    soundsRef.current.ms_slap = audioBuffers.ms_73 || soundsRef.current.ms; // 's' slap sound
+    soundsRef.current.hs_open = audioBuffers.hs_30 || soundsRef.current.hs; // '0' damp sound
+    soundsRef.current.hs_muted = audioBuffers.hs_58 || soundsRef.current.hs; // 'X' hit sound
+    soundsRef.current.hs_rim = audioBuffers.hs_72 || soundsRef.current.hs; // 'r' rim sound
+    soundsRef.current.hs_slap = audioBuffers.hs_73 || soundsRef.current.hs; // 's' slap sound
+  }, [getRequiredAudioFiles, loadAudioFile]);
 
   // Initialize audio context and preload samples (only on user interaction)
   const initializeAudio = useCallback(async () => {
@@ -352,12 +394,13 @@ export function useAudioEngine({
     return buffer;
   };
 
-  // Play a sound with specific character handling
+  // Play a sound with specific character handling and dynamic accent/tap scaling
   const playSound = useCallback(
     (instrument: string, char?: string) => {
       if (!audioContextRef.current) return;
 
       let soundBuffer: AudioBuffer | undefined;
+      let strokeGainMultiplier = 1.0;
 
       // Handle agogo-specific character mappings
       if (instrument === "ag" && char) {
@@ -365,16 +408,80 @@ export function useAudioEngine({
           soundBuffer = soundsRef.current.ag_low;
         } else if (char === "o" && soundsRef.current.ag_high) {
           soundBuffer = soundsRef.current.ag_high;
+        } else if (char === "." && soundsRef.current.ag_ghost) {
+          soundBuffer = soundsRef.current.ag_ghost;
+          strokeGainMultiplier = 0.4;
+        } else if (char === "r" && soundsRef.current.ag_rim) {
+          soundBuffer = soundsRef.current.ag_rim;
         } else {
           soundBuffer = soundsRef.current[instrument];
         }
       }
-      // Handle snare-specific character mappings
+      // Handle snare-specific character mappings (strong dynamic contrast between '.' tap and 'X' accent)
       else if (instrument === "sn" && char) {
         if (char === "X" && soundsRef.current.sn_accent) {
           soundBuffer = soundsRef.current.sn_accent;
+          strokeGainMultiplier = 1.85; // Boost sn_58 (-23.4dB) so accents crack clearly above taps
         } else if (char === "." && soundsRef.current.sn_ghost) {
           soundBuffer = soundsRef.current.sn_ghost;
+          strokeGainMultiplier = 0.32; // Ghost note tap at ~30% volume
+        } else if (char === "f" && soundsRef.current.sn_flam) {
+          soundBuffer = soundsRef.current.sn_flam;
+          strokeGainMultiplier = 1.25;
+        } else if (char === "r" && soundsRef.current.sn_rim) {
+          soundBuffer = soundsRef.current.sn_rim;
+          strokeGainMultiplier = 1.45;
+        } else {
+          soundBuffer = soundsRef.current[instrument];
+        }
+      }
+      // Handle repi-specific character mappings
+      else if (instrument === "re" && char) {
+        if (char === "X" && soundsRef.current.re_accent) {
+          soundBuffer = soundsRef.current.re_accent;
+          strokeGainMultiplier = 1.15;
+        } else if (char === "." && soundsRef.current.re_ghost) {
+          soundBuffer = soundsRef.current.re_ghost;
+          strokeGainMultiplier = 0.45;
+        } else if (char === "f" && soundsRef.current.re_flam) {
+          soundBuffer = soundsRef.current.re_flam;
+          strokeGainMultiplier = 1.2;
+        } else if (char === "h" && soundsRef.current.re_hand) {
+          soundBuffer = soundsRef.current.re_hand;
+          strokeGainMultiplier = 0.95;
+        } else if (char === "r" && soundsRef.current.re_rim) {
+          soundBuffer = soundsRef.current.re_rim;
+          strokeGainMultiplier = 1.2;
+        } else if (char === "s" && soundsRef.current.re_slap) {
+          soundBuffer = soundsRef.current.re_slap;
+          strokeGainMultiplier = 1.1;
+        } else if (char === "z" && soundsRef.current.re_buzz) {
+          soundBuffer = soundsRef.current.re_buzz;
+          strokeGainMultiplier = 1.1;
+        } else {
+          soundBuffer = soundsRef.current[instrument];
+        }
+      }
+      // Handle tamborim character mappings
+      else if (instrument === "ta" && char) {
+        if (char === "f" && soundsRef.current.ta_flam) {
+          soundBuffer = soundsRef.current.ta_flam;
+          strokeGainMultiplier = 1.2;
+        } else if (char === "r" && soundsRef.current.ta_rim) {
+          soundBuffer = soundsRef.current.ta_rim;
+          strokeGainMultiplier = 1.2;
+        } else {
+          soundBuffer = soundsRef.current.ta_accent || soundsRef.current[instrument];
+        }
+      }
+      // Handle shaker character mappings
+      else if (instrument === "sh" && char) {
+        if (char === "X" && soundsRef.current.sh_accent) {
+          soundBuffer = soundsRef.current.sh_accent;
+          strokeGainMultiplier = 1.15;
+        } else if (char === "." && soundsRef.current.sh_ghost) {
+          soundBuffer = soundsRef.current.sh_ghost;
+          strokeGainMultiplier = 0.55;
         } else {
           soundBuffer = soundsRef.current[instrument];
         }
@@ -384,32 +491,67 @@ export function useAudioEngine({
 
       if (!soundBuffer) return;
 
+      const baseGain =
+        (volume / 100) * ((instrumentStates[instrument]?.volume || 70) / 100);
+
       const source = audioContextRef.current.createBufferSource();
       const gainNode = audioContextRef.current.createGain();
 
       source.buffer = soundBuffer;
       source.connect(gainNode);
       gainNode.connect(audioContextRef.current.destination);
-
-      const instrumentVolume = instrumentStates[instrument]?.volume || 70;
-      gainNode.gain.value = (volume / 100) * (instrumentVolume / 100);
+      gainNode.gain.value = baseGain * strokeGainMultiplier;
 
       source.start();
+
+      // For Snare accent ('X'), layer a subtle rim transient (sn_72) so the attack
+      // cuts cleanly and unmistakably above ghost taps ('.')
+      if (
+        instrument === "sn" &&
+        char === "X" &&
+        soundsRef.current.sn_rim &&
+        soundsRef.current.sn_rim !== soundBuffer
+      ) {
+        const transientSource = audioContextRef.current.createBufferSource();
+        const transientGain = audioContextRef.current.createGain();
+        transientSource.buffer = soundsRef.current.sn_rim;
+        transientSource.connect(transientGain);
+        transientGain.connect(audioContextRef.current.destination);
+        transientGain.gain.value = baseGain * 0.45;
+        transientSource.start();
+      }
     },
     [volume, instrumentStates],
   );
 
-  // Main playback loop
+  // Main playback loop - store latest callback in a ref so editing patterns
+  // while playing does not reset the setInterval timer
   const playPattern = useCallback(() => {
     const pattern = tune.patterns[patternName];
     if (!pattern) return;
 
-    const patternLength = pattern.ls ? pattern.ls.length : 16;
+    const resolvePatternStr = (inst: string): string | undefined => {
+      let val = pattern[inst];
+      let guard = 0;
+      while (typeof val === "string" && val.startsWith("@") && guard < 5) {
+        val = pattern[val.slice(1)];
+        guard++;
+      }
+      return typeof val === "string" ? val : undefined;
+    };
+
+    const lengths = Object.keys(instrumentStates)
+      .map((inst) => resolvePatternStr(inst)?.length || 0)
+      .filter((len) => len > 0);
+    const patternLength = lengths.length > 0 ? Math.max(...lengths) : 16;
+
+    const step = currentStepRef.current % patternLength;
 
     // Play sounds for current step
     Object.keys(instrumentStates).forEach((instrument) => {
-      if (instrumentStates[instrument].enabled && pattern[instrument]) {
-        const char = pattern[instrument][currentStep];
+      const instPattern = resolvePatternStr(instrument);
+      if (instrumentStates[instrument].enabled && instPattern) {
+        const char = instPattern[step];
         if (char && char !== " ") {
           playSound(instrument, char);
         }
@@ -417,17 +559,21 @@ export function useAudioEngine({
     });
 
     // Update step
-    const nextStep = (currentStep + 1) % patternLength;
-    setCurrentStep(nextStep);
+    const nextStep = (step + 1) % patternLength;
+    currentStepRef.current = nextStep;
     onStepChange(nextStep);
   }, [
     tune,
     patternName,
-    currentStep,
     instrumentStates,
     playSound,
     onStepChange,
   ]);
+
+  const playPatternRef = useRef(playPattern);
+  useEffect(() => {
+    playPatternRef.current = playPattern;
+  }, [playPattern]);
 
   // Start playback
   const play = useCallback(async () => {
@@ -457,7 +603,7 @@ export function useAudioEngine({
   // Stop playback
   const stop = useCallback(() => {
     setIsPlaying(false);
-    setCurrentStep(0);
+    currentStepRef.current = 0;
     onStepChange(0);
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -465,16 +611,19 @@ export function useAudioEngine({
     }
   }, [onStepChange]);
 
-  // Handle tempo changes and playback timing
+  // Handle tempo changes and playback timing without resetting interval on pattern edits
+  const stepSubdivision = tune?.stepSubdivision || 4;
   useEffect(() => {
     if (isPlaying) {
-      const stepInterval = ((60 / tempo) * 1000) / 4; // 16th notes
+      const stepInterval = ((60 / tempo) * 1000) / stepSubdivision;
 
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
 
-      intervalRef.current = setInterval(playPattern, stepInterval);
+      intervalRef.current = setInterval(() => {
+        playPatternRef.current();
+      }, stepInterval);
 
       return () => {
         if (intervalRef.current) {
@@ -482,21 +631,13 @@ export function useAudioEngine({
         }
       };
     }
-  }, [isPlaying, tempo, playPattern]);
+  }, [isPlaying, tempo, stepSubdivision]);
 
   // Reset step when pattern changes
   useEffect(() => {
-    setCurrentStep(0);
+    currentStepRef.current = 0;
     onStepChange(0);
   }, [patternName, onStepChange]);
-
-  // Don't preload audio - only initialize on user interaction
-  // This prevents AudioContext creation before user gesture (required by Chrome/Safari)
-  useEffect(() => {
-    // Reset audio loaded state when tune changes
-    audioLoadedRef.current = false;
-    setIsAudioLoaded(false);
-  }, [tune]);
 
   // Cleanup
   useEffect(() => {
@@ -509,7 +650,7 @@ export function useAudioEngine({
 
   return {
     isPlaying,
-    currentStep,
+    currentStep: currentStepRef.current,
     isAudioLoaded,
     play,
     pause,
@@ -560,13 +701,23 @@ export async function renderAuthenticAudio(
   // Same audio files mapping as in the player - using direct URLs for faster loading
   const audioFiles = {
     ls_73: audioBaseUrl + "ls_73.mp3",
+    ms_73: audioBaseUrl + "ms_73.mp3",
     hs_74: audioBaseUrl + "hs_74.mp3",
     sn_2e: audioBaseUrl + "sn_2e.mp3", // Ghost note
     sn_58: audioBaseUrl + "sn_58.mp3", // Accent
+    sn_66: audioBaseUrl + "sn_66.mp3", // Flam
+    sn_72: audioBaseUrl + "sn_72.mp3", // Rim
     re_58: audioBaseUrl + "re_58.mp3",
+    re_2e: audioBaseUrl + "re_2e.mp3",
+    re_66: audioBaseUrl + "re_66.mp3",
+    re_68: audioBaseUrl + "re_68.mp3",
+    re_72: audioBaseUrl + "re_72.mp3",
+    re_73: audioBaseUrl + "re_73.mp3",
+    re_7a: audioBaseUrl + "re_7a.mp3",
     ag_61: audioBaseUrl + "ag_61.mp3", // Low bell
     ag_6f: audioBaseUrl + "ag_6f.mp3", // High bell
     ta_58: audioBaseUrl + "ta_58.mp3",
+    sh_58: audioBaseUrl + "sh_58.mp3",
     sh_2e: audioBaseUrl + "sh_2e.mp3",
   };
 
@@ -579,17 +730,26 @@ export async function renderAuthenticAudio(
   // Map to instruments
   const sounds: Record<string, AudioBuffer | null> = {
     ls: audioBuffers.ls_73,
-    ms: audioBuffers.ls_73, // Use same as low surdo
+    ms: audioBuffers.ms_73 || audioBuffers.ls_73,
     hs: audioBuffers.hs_74,
     re: audioBuffers.re_58,
+    re_ghost: audioBuffers.re_2e,
+    re_flam: audioBuffers.re_66,
+    re_hand: audioBuffers.re_68,
+    re_rim: audioBuffers.re_72,
+    re_slap: audioBuffers.re_73,
+    re_buzz: audioBuffers.re_7a,
     sn: audioBuffers.sn_58,
     sn_accent: audioBuffers.sn_58,
     sn_ghost: audioBuffers.sn_2e,
+    sn_flam: audioBuffers.sn_66,
+    sn_rim: audioBuffers.sn_72,
     ta: audioBuffers.ta_58,
     ag: audioBuffers.ag_61,
     ag_low: audioBuffers.ag_61,
     ag_high: audioBuffers.ag_6f,
-    sh: audioBuffers.sh_2e,
+    sh: audioBuffers.sh_58 || audioBuffers.sh_2e,
+    sh_ghost: audioBuffers.sh_2e,
   };
 
   // Create offline context for rendering
@@ -605,8 +765,9 @@ export async function renderAuthenticAudio(
     throw new Error("Pattern not found");
   }
 
-  const stepDuration = 60 / tempo / 4; // 16th note duration
-  const patternLength = 16;
+  const stepSubdivision = tune?.stepSubdivision || 4;
+  const stepDuration = 60 / tempo / stepSubdivision;
+  const patternLength = pattern.ls ? pattern.ls.length : 16;
 
   // Render the pattern
   for (
@@ -629,15 +790,58 @@ export async function renderAuthenticAudio(
 
         // Get the appropriate sound buffer
         let soundBuffer: AudioBuffer | null = null;
+        let strokeGainMultiplier = 1.0;
 
         if (instrument === "ag") {
           if (char === "a") soundBuffer = sounds.ag_low;
           else if (char === "o") soundBuffer = sounds.ag_high;
           else soundBuffer = sounds.ag;
         } else if (instrument === "sn") {
-          if (char === "X") soundBuffer = sounds.sn_accent;
-          else if (char === ".") soundBuffer = sounds.sn_ghost;
-          else soundBuffer = sounds.sn;
+          if (char === "X") {
+            soundBuffer = sounds.sn_accent;
+            strokeGainMultiplier = 1.85;
+          } else if (char === ".") {
+            soundBuffer = sounds.sn_ghost;
+            strokeGainMultiplier = 0.32;
+          } else if (char === "f") {
+            soundBuffer = sounds.sn_flam;
+            strokeGainMultiplier = 1.25;
+          } else if (char === "r") {
+            soundBuffer = sounds.sn_rim;
+            strokeGainMultiplier = 1.45;
+          } else {
+            soundBuffer = sounds.sn;
+          }
+        } else if (instrument === "re") {
+          if (char === ".") {
+            soundBuffer = sounds.re_ghost;
+            strokeGainMultiplier = 0.45;
+          } else if (char === "f") {
+            soundBuffer = sounds.re_flam;
+            strokeGainMultiplier = 1.2;
+          } else if (char === "h") {
+            soundBuffer = sounds.re_hand;
+            strokeGainMultiplier = 0.95;
+          } else if (char === "r") {
+            soundBuffer = sounds.re_rim;
+            strokeGainMultiplier = 1.2;
+          } else if (char === "s") {
+            soundBuffer = sounds.re_slap;
+            strokeGainMultiplier = 1.1;
+          } else if (char === "z") {
+            soundBuffer = sounds.re_buzz;
+            strokeGainMultiplier = 1.1;
+          } else {
+            soundBuffer = sounds.re;
+            strokeGainMultiplier = 1.15;
+          }
+        } else if (instrument === "sh") {
+          if (char === ".") {
+            soundBuffer = sounds.sh_ghost;
+            strokeGainMultiplier = 0.55;
+          } else {
+            soundBuffer = sounds.sh;
+          }
         } else {
           soundBuffer = sounds[instrument];
         }
@@ -654,7 +858,8 @@ export async function renderAuthenticAudio(
 
         // Apply volume
         const instrumentVolume = instrumentStates[instrument]?.volume || 70;
-        gainNode.gain.value = (instrumentVolume / 100) * 0.7; // Master volume
+        gainNode.gain.value =
+          (instrumentVolume / 100) * 0.7 * strokeGainMultiplier;
 
         source.start(time);
       });

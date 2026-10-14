@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -7,7 +7,7 @@ import { Play, Pause, OctagonMinus } from "lucide-react";
 import PatternVisualizer from "./pattern-visualizer";
 import InstrumentToggle from "./instrument-toggle";
 import AudioContextWarning from "./audio-context-warning";
-import DrummerPovBox from "./drummer-pov-box";
+import DrummerPovBox, { type AllowedDrumInstrument } from "./drummer-pov-box";
 import { useAudioEngine } from "@/lib/audio-engine";
 import type { Tune } from "@/data/tunes";
 
@@ -23,6 +23,7 @@ export default function BeatboxPlayer({ tune, showDrummerPov = false }: BeatboxP
   const [tempo, setTempo] = useState(tune.speed || 120);
   const [volume, setVolume] = useState(70);
   const [currentStep, setCurrentStep] = useState(0);
+  const [soloInstrument, setSoloInstrument] = useState<AllowedDrumInstrument | null>(null);
   
   const [instrumentStates, setInstrumentStates] = useState<Record<string, { enabled: boolean; volume: number }>>({
     ls: { enabled: true, volume: 100 }, // 3x louder surdo
@@ -35,6 +36,18 @@ export default function BeatboxPlayer({ tune, showDrummerPov = false }: BeatboxP
     sh: { enabled: true, volume: 60 }
   });
 
+  const effectiveInstrumentStates = useMemo(() => {
+    if (!soloInstrument) return instrumentStates;
+    const next: Record<string, { enabled: boolean; volume: number }> = {};
+    for (const [key, state] of Object.entries(instrumentStates)) {
+      next[key] = {
+        ...state,
+        enabled: key === soloInstrument,
+      };
+    }
+    return next;
+  }, [instrumentStates, soloInstrument]);
+
   // Update selected pattern when tune changes
   useEffect(() => {
     const firstPattern = Object.keys(tune.patterns)[0];
@@ -46,18 +59,19 @@ export default function BeatboxPlayer({ tune, showDrummerPov = false }: BeatboxP
   // Reset tempo when tune changes
   useEffect(() => {
     setTempo(tune.speed || 120);
-  }, [tune]);
+  }, [tune.name, tune.speed]);
 
   const { isPlaying, isAudioLoaded, play, pause, stop } = useAudioEngine({
     tune,
     pattern: selectedPattern,
     tempo,
     volume,
-    instrumentStates,
+    instrumentStates: effectiveInstrumentStates,
     onStepChange: setCurrentStep
   });
 
   const handleInstrumentToggle = useCallback((instrument: string, enabled: boolean) => {
+    setSoloInstrument(null);
     setInstrumentStates(prev => ({
       ...prev,
       [instrument]: { ...prev[instrument], enabled }
@@ -98,6 +112,8 @@ export default function BeatboxPlayer({ tune, showDrummerPov = false }: BeatboxP
           currentStep={currentStep}
           onTogglePlayPause={togglePlayPause}
           onStop={stop}
+          soloInstrument={soloInstrument}
+          onSoloInstrumentChange={setSoloInstrument}
         />
       )}
 
@@ -193,7 +209,9 @@ export default function BeatboxPlayer({ tune, showDrummerPov = false }: BeatboxP
           <PatternVisualizer
             pattern={pattern}
             currentStep={currentStep}
-            instrumentStates={instrumentStates}
+            instrumentStates={effectiveInstrumentStates}
+            isPlaying={isPlaying}
+            beatsPerBar={pattern.time || tune.time || 4}
           />
           <div className="mt-4 text-sm text-gray-400">
             <div className="mb-2">
@@ -207,13 +225,24 @@ export default function BeatboxPlayer({ tune, showDrummerPov = false }: BeatboxP
 
         {/* Instrument Toggles */}
         <div>
-          <h3 className="street-text font-semibold text-lg mb-3">Instruments</h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="street-text font-semibold text-lg">Instruments</h3>
+            {soloInstrument && (
+              <button
+                type="button"
+                onClick={() => setSoloInstrument(null)}
+                className="text-xs px-2.5 py-1 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 transition-colors"
+              >
+                Solo Mode Active ({soloInstrument.toUpperCase()}) — Click to restore Full Band
+              </button>
+            )}
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <InstrumentToggle
               instrument="ls"
               label="Low Surdo"
               description="Bass drum"
-              enabled={instrumentStates.ls.enabled}
+              enabled={effectiveInstrumentStates.ls.enabled}
               volume={instrumentStates.ls.volume}
               onToggle={handleInstrumentToggle}
               onVolumeChange={handleInstrumentVolumeChange}
@@ -222,7 +251,7 @@ export default function BeatboxPlayer({ tune, showDrummerPov = false }: BeatboxP
               instrument="ms"
               label="Mid Surdo"
               description="Mid drum"
-              enabled={instrumentStates.ms.enabled}
+              enabled={effectiveInstrumentStates.ms.enabled}
               volume={instrumentStates.ms.volume}
               onToggle={handleInstrumentToggle}
               onVolumeChange={handleInstrumentVolumeChange}
@@ -231,7 +260,7 @@ export default function BeatboxPlayer({ tune, showDrummerPov = false }: BeatboxP
               instrument="hs"
               label="High Surdo"
               description="High drum"
-              enabled={instrumentStates.hs.enabled}
+              enabled={effectiveInstrumentStates.hs.enabled}
               volume={instrumentStates.hs.volume}
               onToggle={handleInstrumentToggle}
               onVolumeChange={handleInstrumentVolumeChange}
@@ -240,7 +269,7 @@ export default function BeatboxPlayer({ tune, showDrummerPov = false }: BeatboxP
               instrument="re"
               label="Repi"
               description="Repinique"
-              enabled={instrumentStates.re.enabled}
+              enabled={effectiveInstrumentStates.re.enabled}
               volume={instrumentStates.re.volume}
               onToggle={handleInstrumentToggle}
               onVolumeChange={handleInstrumentVolumeChange}
@@ -249,7 +278,7 @@ export default function BeatboxPlayer({ tune, showDrummerPov = false }: BeatboxP
               instrument="sn"
               label="Snare"
               description="Caixa"
-              enabled={instrumentStates.sn.enabled}
+              enabled={effectiveInstrumentStates.sn.enabled}
               volume={instrumentStates.sn.volume}
               onToggle={handleInstrumentToggle}
               onVolumeChange={handleInstrumentVolumeChange}
@@ -258,7 +287,7 @@ export default function BeatboxPlayer({ tune, showDrummerPov = false }: BeatboxP
               instrument="ta"
               label="Tamborim"
               description="Tam"
-              enabled={instrumentStates.ta.enabled}
+              enabled={effectiveInstrumentStates.ta.enabled}
               volume={instrumentStates.ta.volume}
               onToggle={handleInstrumentToggle}
               onVolumeChange={handleInstrumentVolumeChange}
@@ -267,7 +296,7 @@ export default function BeatboxPlayer({ tune, showDrummerPov = false }: BeatboxP
               instrument="ag"
               label="Agogô"
               description="Bell"
-              enabled={instrumentStates.ag.enabled}
+              enabled={effectiveInstrumentStates.ag.enabled}
               volume={instrumentStates.ag.volume}
               onToggle={handleInstrumentToggle}
               onVolumeChange={handleInstrumentVolumeChange}
@@ -276,7 +305,7 @@ export default function BeatboxPlayer({ tune, showDrummerPov = false }: BeatboxP
               instrument="sh"
               label="Shaker"
               description="Chocalho"
-              enabled={instrumentStates.sh.enabled}
+              enabled={effectiveInstrumentStates.sh.enabled}
               volume={instrumentStates.sh.volume}
               onToggle={handleInstrumentToggle}
               onVolumeChange={handleInstrumentVolumeChange}

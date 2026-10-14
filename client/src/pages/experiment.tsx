@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,11 +8,124 @@ import BeatboxPlayer from "@/components/beatbox-player";
 import { renderAuthenticAudio, useAudioEngine } from "@/lib/audio-engine";
 import { RotateCcw, Download, Play, Pause } from "lucide-react";
 
+interface InstrumentMeta {
+  key: string;
+  name: string;
+  description: string;
+}
+
+interface PatternEditorProps {
+  instrument: InstrumentMeta;
+  pattern: string;
+  patternLength: number;
+  onClear: (instrumentKey: string) => void;
+  onUpdateStep: (instrumentKey: string, index: number, value: string) => void;
+}
+
+const PatternEditor = memo(function PatternEditor({
+  instrument,
+  pattern,
+  patternLength,
+  onClear,
+  onUpdateStep,
+}: PatternEditorProps) {
+  // Create rows of 8 beats each
+  const rows = [];
+  for (let i = 0; i < patternLength; i += 8) {
+    rows.push(Array.from({ length: Math.min(8, patternLength - i) }, (_, j) => i + j));
+  }
+
+  return (
+    <Card className="bg-gray-800 border-gray-700">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-lg">{instrument.name}</CardTitle>
+            <p className="text-sm text-gray-400">{instrument.description}</p>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => onClear(instrument.key)}
+            className="text-xs"
+          >
+            Clear
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {/* Pattern grid with 8 beats per row */}
+        <div className="space-y-2">
+          {rows.map((row, rowIndex) => (
+            <div key={rowIndex} className="flex items-center justify-between overflow-x-auto px-2 sm:px-4">
+              {row.map((beatIndex) => {
+                return (
+                  <div key={beatIndex} className="flex flex-col items-center">
+                    <div className="text-xs text-gray-500 mb-1">{beatIndex + 1}</div>
+                    <button
+                      type="button"
+                      className={`w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 border rounded-full text-xs font-bold transition-colors duration-150 ${
+                        pattern[beatIndex] === ' '
+                          ? 'border-gray-600 bg-gray-800 hover:bg-gray-700 text-gray-400'
+                          : pattern[beatIndex] === '.'
+                          ? 'border-cyan-400 bg-cyan-900/70 text-cyan-200 shadow-sm shadow-cyan-500/20'
+                          : 'border-green-400 bg-green-500 text-white shadow-lg shadow-green-500/30'
+                      } focus:ring-2 focus:ring-white focus:outline-none`}
+                      onClick={() => {
+                        const currentChar = pattern[beatIndex];
+                        let nextChar = ' ';
+
+                        if (instrument.key === 'ag') {
+                          if (currentChar === ' ') nextChar = 'a';
+                          else if (currentChar === 'a') nextChar = 'o';
+                          else nextChar = ' ';
+                        } else if (instrument.key === 'sn' || instrument.key === 're') {
+                          if (currentChar === ' ') nextChar = '.';
+                          else if (currentChar === '.') nextChar = 'X';
+                          else nextChar = ' ';
+                        } else {
+                          nextChar = currentChar === 'X' ? ' ' : 'X';
+                        }
+
+                        onUpdateStep(instrument.key, beatIndex, nextChar);
+                      }}
+                    >
+                      {pattern[beatIndex] === ' ' ? '·' : pattern[beatIndex]}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-3 text-xs text-gray-500 text-center">
+          {instrument.key === 'ag' ? 'Click: • → a → o → •' :
+           instrument.key === 'sn' || instrument.key === 're' ? 'Click: • → . (tap) → X (accent) → •' :
+           'Click: • → X → •'}
+        </div>
+      </CardContent>
+    </Card>
+  );
+});
+
+const INSTRUMENTS: InstrumentMeta[] = [
+  { key: 'ls', name: 'Low Surdo', description: 'Deep bass drum' },
+  { key: 'ms', name: 'Mid Surdo', description: 'Medium bass drum' },
+  { key: 'hs', name: 'High Surdo', description: 'High bass drum' },
+  { key: 're', name: 'Repi', description: 'Snare-like drum' },
+  { key: 'sn', name: 'Snare', description: 'Sharp snare drum' },
+  { key: 'ta', name: 'Tamborim', description: 'Small high-pitched drum' },
+  { key: 'ag', name: 'Agogo', description: 'Two-tone bell (o=low, a=high)' },
+  { key: 'sh', name: 'Shaker', description: 'Percussion shaker' }
+];
+
+const noopStepChange = () => {};
+
 export default function Experiment() {
   const [tuneName, setTuneName] = useState("My Custom Beat");
   const [tempo, setTempo] = useState(120);
   const [patternLength, setPatternLength] = useState(16);
-  const [currentStep, setCurrentStep] = useState(0);
   const [instrumentStates, setInstrumentStates] = useState({
     ls: { enabled: true, volume: 80 },
     ms: { enabled: true, volume: 75 },
@@ -33,17 +146,6 @@ export default function Experiment() {
     ag: "a   o   a   o   ", // Agogo
     sh: ". . . . . . . . "  // Shaker
   });
-
-  const instruments = [
-    { key: 'ls', name: 'Low Surdo', description: 'Deep bass drum' },
-    { key: 'ms', name: 'Mid Surdo', description: 'Medium bass drum' },
-    { key: 'hs', name: 'High Surdo', description: 'High bass drum' },
-    { key: 're', name: 'Repi', description: 'Snare-like drum' },
-    { key: 'sn', name: 'Snare', description: 'Sharp snare drum' },
-    { key: 'ta', name: 'Tamborim', description: 'Small high-pitched drum' },
-    { key: 'ag', name: 'Agogo', description: 'Two-tone bell (a=low, o=high)' },
-    { key: 'sh', name: 'Shaker', description: 'Percussion shaker' }
-  ];
 
   const updatePattern = useCallback((instrument: string, index: number, value: string) => {
     setPatterns(prev => {
@@ -123,7 +225,7 @@ export default function Experiment() {
     tempo: tempo,
     volume: 100,
     instrumentStates: instrumentStates,
-    onStepChange: setCurrentStep
+    onStepChange: noopStepChange
   });
 
   const downloadAsMP3 = useCallback(async () => {
@@ -216,86 +318,6 @@ export default function Experiment() {
     return arrayBuffer;
   };
 
-  const PatternEditor = ({ instrument }: { instrument: any }) => {
-    const pattern = patterns[instrument.key as keyof typeof patterns];
-    
-    // Create rows of 8 beats each
-    const rows = [];
-    for (let i = 0; i < patternLength; i += 8) {
-      rows.push(Array.from({ length: Math.min(8, patternLength - i) }, (_, j) => i + j));
-    }
-    
-    return (
-      <Card className="bg-gray-800 border-gray-700">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-lg">{instrument.name}</CardTitle>
-              <p className="text-sm text-gray-400">{instrument.description}</p>
-            </div>
-            <Button 
-              size="sm" 
-              variant="outline" 
-              onClick={() => clearPattern(instrument.key)}
-              className="text-xs"
-            >
-              Clear
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {/* Pattern grid with 8 beats per row */}
-          <div className="space-y-2">
-            {rows.map((row, rowIndex) => (
-              <div key={rowIndex} className="flex items-center justify-between overflow-x-auto px-2 sm:px-4">
-                {row.map((beatIndex) => {
-                  return (
-                    <div key={beatIndex} className="flex flex-col items-center">
-                      <div className="text-xs text-gray-500 mb-1">{beatIndex + 1}</div>
-                      <button
-                        className={`w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 border rounded-full text-xs font-bold transition-all duration-200 ${
-                          pattern[beatIndex] === ' '
-                            ? 'border-gray-600 bg-gray-800 hover:bg-gray-700 text-gray-400'
-                            : 'border-green-400 bg-green-500 text-white shadow-lg shadow-green-500/30'
-                        } focus:ring-2 focus:ring-white focus:outline-none`}
-                        onClick={() => {
-                          const currentChar = pattern[beatIndex];
-                          let nextChar = ' ';
-                          
-                          if (instrument.key === 'ag') {
-                            if (currentChar === ' ') nextChar = 'a';
-                            else if (currentChar === 'a') nextChar = 'o';
-                            else nextChar = ' ';
-                          } else if (instrument.key === 'sn') {
-                            if (currentChar === ' ') nextChar = '.';
-                            else if (currentChar === '.') nextChar = 'X';
-                            else nextChar = ' ';
-                          } else {
-                            nextChar = currentChar === 'X' ? ' ' : 'X';
-                          }
-                          
-                          updatePattern(instrument.key, beatIndex, nextChar);
-                        }}
-                      >
-                        {pattern[beatIndex] === ' ' ? '·' : pattern[beatIndex]}
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-          
-          <div className="mt-3 text-xs text-gray-500 text-center">
-            {instrument.key === 'ag' ? 'Click: • → a → o → •' : 
-             instrument.key === 'sn' ? 'Click: • → . → X → •' : 
-             'Click: • → X → •'}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
-
   return (
     <div className="min-h-screen bg-black overflow-x-hidden">
       <div className="w-full max-w-none mx-auto px-2 sm:px-3 lg:px-4 py-8 sm:py-16">
@@ -332,6 +354,8 @@ export default function Experiment() {
                 <SelectItem value="48">48 beats</SelectItem>
                 <SelectItem value="56">56 beats</SelectItem>
                 <SelectItem value="64">64 beats</SelectItem>
+                <SelectItem value="120">120 beats</SelectItem>
+                <SelectItem value="128">128 beats</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -354,10 +378,9 @@ export default function Experiment() {
         <div className="flex flex-wrap gap-4 mb-8 justify-center">
           <Button 
             onClick={isPlaying ? stop : play}
-            disabled={!isAudioLoaded}
-            className="bg-red-600 hover:bg-red-700 text-white disabled:bg-gray-600"
+            className="bg-red-600 hover:bg-red-700 text-white"
           >
-            {!isAudioLoaded ? (
+            {!isAudioLoaded && isPlaying ? (
               <>Loading...</>
             ) : isPlaying ? (
               <>
@@ -392,8 +415,15 @@ export default function Experiment() {
 
         {/* Pattern Editors */}
         <div className="space-y-6 mb-8">
-          {instruments.map((instrument) => (
-            <PatternEditor key={instrument.key} instrument={instrument} />
+          {INSTRUMENTS.map((instrument) => (
+            <PatternEditor
+              key={instrument.key}
+              instrument={instrument}
+              pattern={patterns[instrument.key as keyof typeof patterns]}
+              patternLength={patternLength}
+              onClear={clearPattern}
+              onUpdateStep={updatePattern}
+            />
           ))}
         </div>
 
@@ -407,9 +437,9 @@ export default function Experiment() {
         <div className="mt-12 bg-gray-800 border border-gray-700 rounded-xl p-6">
           <h3 className="street-text text-xl font-bold mb-4">How to Use</h3>
           <div className="space-y-4 text-gray-300">
-            <p><strong>Pattern Length:</strong> Choose how many beats your pattern should have (8, 16, 24, 32, 40, 48, 56, or 64).</p>
+            <p><strong>Pattern Length:</strong> Choose how many beats your pattern should have (8, 16, 24, 32, 40, 48, 56, 64, 120, or 128).</p>
             <p><strong>Pattern Grid:</strong> Each row represents an instrument, and each column represents a beat. Click circles to toggle beats on/off.</p>
-            <p><strong>Agogo:</strong> Has two sounds - 'a' for low bell and 'o' for high bell.</p>
+            <p><strong>Agogo:</strong> Has two sounds - 'a' for high bell and 'o' for low bell.</p>
             <p><strong>Snare:</strong> Has two sounds - '.' for ghost notes and 'X' for accent hits.</p>
             <p><strong>Other Instruments:</strong> Click to toggle between hit (X) and rest (•).</p>
             <p><strong>Download:</strong> Save your beat as an audio file to share with others.</p>

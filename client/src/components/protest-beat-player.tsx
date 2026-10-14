@@ -197,6 +197,8 @@ const ProtestBeatPlayer = forwardRef<ProtestBeatPlayerRef, ProtestBeatPlayerProp
             pattern={currentPattern} 
             currentStep={currentStep}
             instrumentStates={instrumentStates}
+            isPlaying={isPlaying}
+            beatsPerBar={currentPattern.time || tune.time || 4}
           />
         </div>
 
